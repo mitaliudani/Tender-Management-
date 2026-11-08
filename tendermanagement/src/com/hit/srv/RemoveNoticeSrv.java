@@ -23,6 +23,7 @@ public class RemoveNoticeSrv extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
+     * Creates the legacy notice-removal servlet without initializing external resources.
      * @see HttpServlet#HttpServlet()
      */
     public RemoveNoticeSrv() {
@@ -31,6 +32,10 @@ public class RemoveNoticeSrv extends HttpServlet {
     }
 
 	/**
+	 * Verifies the existing admin session, removes the requested notice, and renders
+	 * an HTML-escaped status. The security filter rejects GET before reaching this
+	 * shared legacy handler, so only CSRF-validated POST requests execute it.
+	 *
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -67,6 +72,8 @@ public class RemoveNoticeSrv extends HttpServlet {
 	}
 
 	/**
+	 * Handles authorized notice-removal POSTs using the shared legacy implementation.
+	 *
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

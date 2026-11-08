@@ -13,6 +13,14 @@ public final class CsrfTokens {
 
     private CsrfTokens() { }
 
+    /**
+     * Returns the existing session token, creating a cryptographically random one if absent.
+     * All forms in one session share the same token, so it must not be logged or exposed in URLs.
+     *
+     * @param session the authenticated session, never null
+     * @return a 43-character URL-safe token
+     * @throws IllegalArgumentException if the session is null
+     */
     public static String getOrCreate(HttpSession session) {
         if (session == null) throw new IllegalArgumentException("An authenticated session is required");
         synchronized (session) {
@@ -26,6 +34,14 @@ public final class CsrfTokens {
         }
     }
 
+    /**
+     * Checks a form token against the server-side session value without timing-dependent comparison.
+     * This method deliberately never creates a session or new token.
+     *
+     * @param session the existing HTTP session, if any
+     * @param submitted token supplied in the POST form body
+     * @return true only when the submitted token matches the session token
+     */
     public static boolean verify(HttpSession session, String submitted) {
         if (session == null || submitted == null || submitted.length() != 43) return false;
         Object expected = session.getAttribute(ATTRIBUTE);

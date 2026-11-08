@@ -24,6 +24,7 @@ public class AcceptBidSrv extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
+     * Creates the legacy bid-acceptance servlet without initializing external resources.
      * @see HttpServlet#HttpServlet()
      */
     public AcceptBidSrv() {
@@ -32,6 +33,10 @@ public class AcceptBidSrv extends HttpServlet {
     }
 
 	/**
+	 * Verifies the existing admin session, accepts the identified bid, and renders
+	 * an HTML-escaped status. The security filter rejects GET before this shared
+	 * legacy handler can run; only CSRF-validated POST requests may reach it.
+	 *
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -70,6 +75,8 @@ public class AcceptBidSrv extends HttpServlet {
 	}
 
 	/**
+	 * Handles authorized bid-acceptance POSTs using the shared legacy implementation.
+	 *
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

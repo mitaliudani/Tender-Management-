@@ -4,8 +4,10 @@ import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 
 const repo = resolve(import.meta.dirname, '..');
+/** Reads a source file relative to the fork root for static regression assertions. */
 const read = path => readFileSync(resolve(repo, path), 'utf8');
 
+/** Ensures each affected admin mutation is submitted by a CSRF-bearing POST form. */
 test('three sensitive actions use POST forms with synchronizer tokens', () => {
   const cases = [
     ['viewTenderBidsForm.jsp', 'AcceptBidSrv'],
@@ -22,6 +24,7 @@ test('three sensitive actions use POST forms with synchronizer tokens', () => {
   }
 });
 
+/** Confirms all three sensitive URL mappings enforce method, session, and token checks. */
 test('the servlet filter has all mappings and checks method, role, and token', () => {
   const filter = read('tendermanagement/src/com/hit/security/MutatingActionFilter.java');
   for (const action of ['AcceptBidSrv', 'RejectBidSrv', 'RemoveNoticeSrv']) {
@@ -34,6 +37,7 @@ test('the servlet filter has all mappings and checks method, role, and token', (
   assert.match(filter, /CsrfTokens\.verify\(session, request\.getParameter\("csrfToken"\)\)/);
 });
 
+/** Confirms protected views reject absent admins before showing sensitive content. */
 test('the two protected JSPs fail closed without session passwords', () => {
   for (const page of ['viewTenderBidsForm.jsp', 'removeNotice.jsp']) {
     const source = read(`tendermanagement/WebContent/${page}`);
@@ -43,6 +47,7 @@ test('the two protected JSPs fail closed without session passwords', () => {
   }
 });
 
+/** Confirms output in the modified views and status handlers is HTML-escaped. */
 test('affected views and action status outputs are HTML-encoded', () => {
   const bids = read('tendermanagement/WebContent/viewTenderBidsForm.jsp');
   const notices = read('tendermanagement/WebContent/removeNotice.jsp');

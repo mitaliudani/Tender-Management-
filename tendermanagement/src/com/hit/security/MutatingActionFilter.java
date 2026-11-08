@@ -15,9 +15,20 @@ import javax.servlet.http.HttpSession;
 /** Defense in depth for three legacy admin actions. Does not replace DAO-level authorization. */
 @WebFilter(urlPatterns = {"/AcceptBidSrv", "/RejectBidSrv", "/RemoveNoticeSrv"})
 public final class MutatingActionFilter implements Filter {
+    /** Initializes the stateless filter; no resources or external services are opened. */
     @Override
     public void init(FilterConfig config) { }
 
+    /**
+     * Protects the three legacy administrative mutations from GET requests, missing
+     * administrator sessions, and forged POSTs before the servlet performs a DAO operation.
+     *
+     * @param rawRequest servlet request to inspect
+     * @param rawResponse response used for 403/405 denials
+     * @param chain downstream handler invoked only for authorized POSTs
+     * @throws IOException if the servlet response or chain fails
+     * @throws ServletException if downstream processing fails
+     */
     @Override
     public void doFilter(ServletRequest rawRequest, ServletResponse rawResponse, FilterChain chain)
             throws IOException, ServletException {
@@ -47,6 +58,7 @@ public final class MutatingActionFilter implements Filter {
         chain.doFilter(rawRequest, rawResponse);
     }
 
+    /** Releases no resources because the filter is stateless. */
     @Override
     public void destroy() { }
 }

@@ -12,6 +12,7 @@ import static org.junit.Assert.*;
 
 /** Unit tests use synthetic request/session proxies; no live application or database. */
 public class SecurityControlsTest {
+    /** Builds a minimal in-memory HTTP session proxy for deterministic token tests. */
     private static HttpSession session(Map<String, Object> attributes) {
         return (HttpSession) Proxy.newProxyInstance(HttpSession.class.getClassLoader(),
                 new Class<?>[]{HttpSession.class}, (proxy, method, args) -> {
@@ -24,6 +25,7 @@ public class SecurityControlsTest {
                 });
     }
 
+    /** Builds a request proxy exposing only the method, existing session, and CSRF field. */
     private static HttpServletRequest request(String method, HttpSession session, String token) {
         return (HttpServletRequest) Proxy.newProxyInstance(HttpServletRequest.class.getClassLoader(),
                 new Class<?>[]{HttpServletRequest.class}, (proxy, called, args) -> {
@@ -39,6 +41,7 @@ public class SecurityControlsTest {
         int forwarded;
         final Map<String, String> headers = new HashMap<>();
 
+        /** Captures response status and security headers without a servlet container. */
         HttpServletResponse response() {
             return (HttpServletResponse) Proxy.newProxyInstance(HttpServletResponse.class.getClassLoader(),
                     new Class<?>[]{HttpServletResponse.class}, (proxy, called, args) -> {
@@ -55,6 +58,7 @@ public class SecurityControlsTest {
         }
     }
 
+    /** Runs the real filter against test doubles and records whether it reached the handler. */
     private static Result evaluate(String method, HttpSession session, String token) throws Exception {
         Result result = new Result();
         FilterChain chain = (request, response) -> result.forwarded++;
@@ -62,6 +66,7 @@ public class SecurityControlsTest {
         return result;
     }
 
+    /** Checks token lifetime, length, session isolation, and tamper detection. */
     @Test
     public void synchronizerTokenIsStableWithinSessionAndCannotBeGuessedFromOtherSession() {
         HttpSession first = session(new HashMap<>());
@@ -78,6 +83,7 @@ public class SecurityControlsTest {
         assertFalse(CsrfTokens.verify(second, token));
     }
 
+    /** Confirms HTML encoding for markup, attributes, null values, and Unicode text. */
     @Test
     public void htmlEscaperHandlesNullMarkupQuotedAttributesAndUnicode() {
         assertEquals("", HtmlEscaper.escape(null));
@@ -87,6 +93,7 @@ public class SecurityControlsTest {
         assertEquals("नमस्ते", HtmlEscaper.escape("नमस्ते"));
     }
 
+    /** Verifies GET, missing session/token, and non-admin roles all fail closed. */
     @Test
     public void filterRejectsGetMissingTokenAndVendorRole() throws Exception {
         Map<String, Object> attributes = new HashMap<>();
@@ -118,6 +125,7 @@ public class SecurityControlsTest {
         assertEquals(0, invalidRoleType.forwarded);
     }
 
+    /** Verifies a valid admin POST proceeds and blank identities are denied. */
     @Test
     public void filterAllowsAuthorizedAdminPostWithMatchingToken() throws Exception {
         Map<String, Object> attributes = new HashMap<>();

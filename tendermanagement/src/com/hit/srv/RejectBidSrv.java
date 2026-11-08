@@ -24,6 +24,7 @@ public class RejectBidSrv extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
+     * Creates the legacy bid-rejection servlet without initializing external resources.
      * @see HttpServlet#HttpServlet()
      */
     public RejectBidSrv() {
@@ -32,6 +33,10 @@ public class RejectBidSrv extends HttpServlet {
     }
 
 	/**
+	 * Verifies the existing admin session, rejects the identified bid, and renders
+	 * an HTML-escaped status. The security filter denies GET before reaching this
+	 * shared legacy handler, so only CSRF-validated POST requests execute it.
+	 *
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -66,6 +71,8 @@ public class RejectBidSrv extends HttpServlet {
 	}
 
 	/**
+	 * Handles authorized bid-rejection POSTs using the shared legacy implementation.
+	 *
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
