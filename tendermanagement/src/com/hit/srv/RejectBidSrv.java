@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 import com.hit.beans.VendorBean;
 import com.hit.dao.BidderDao;
 import com.hit.dao.BidderDaoImpl;
+import com.hit.security.HtmlEscaper;
 
 /**
  * Servlet implementation class RejectBidSrv
@@ -35,14 +36,14 @@ public class RejectBidSrv extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-		HttpSession session = request.getSession();
-		String user = (String)session.getAttribute("user");
-		String uname = (String)session.getAttribute("username");
-		String pword = (String)session.getAttribute("password");
+		HttpSession session = request.getSession(false);
+		String user = session == null ? null : (String)session.getAttribute("user");
+		String uname = session == null ? null : (String)session.getAttribute("username");
 		
-		if(user==null || !user.equalsIgnoreCase("admin") || uname.equals("") || pword.equals("")){
+		if(!"admin".equalsIgnoreCase(user) || uname == null || uname.trim().isEmpty()){
 			
-			response.sendRedirect("loginFailed.jsp");
+			response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			return;
 			
 		}
 		
@@ -59,7 +60,7 @@ public class RejectBidSrv extends HttpServlet {
 		
 		rd.include(request, response);
 		
-		pw.print("<script>document.getElementById('show').innerHTML='"+status+"'</script>");
+		pw.print("<p role=\"status\">" + HtmlEscaper.escape(status) + "</p>");
 		
 		pw.close();
 	}

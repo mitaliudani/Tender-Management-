@@ -1,0 +1,25 @@
+name: Defensive security regression
+on:
+  push:
+    branches: [master]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  security-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compile backend and test Java security controls
+        run: mvn -q -f tendermanagement/pom.xml test
+      - name: Check JSP/servlet security regression
+        run: node --test security/*.test.mjs
